@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { FlatList, useWindowDimensions, Platform } from "react-native";
-import { Feather } from "@expo/vector-icons";
-import PropertyCard from "../../components/PropertyCard";
-import { YStack, XStack, Text, Input, Button, Theme } from "tamagui";
-import { router } from "expo-router";
+import React, { useState } from "react"
+import { FlatList, Platform } from "react-native"
+import { Feather } from "@expo/vector-icons"
+import PropertyCard from "../../components/PropertyCard"
+import { YStack, XStack, Text, Input, Button, Theme } from "tamagui"
+import { router } from "expo-router"
+import { useWindowDimensions } from "react-native"
 
 const rentalAppTheme = {
   primaryDark: "#016180",
@@ -11,7 +12,7 @@ const rentalAppTheme = {
   backgroundLight: "#fff",
   accentDarkRed: "#8B0000",
   textDark: "#000",
-};
+}
 
 const propertyData = [
   {
@@ -66,11 +67,25 @@ const propertyData = [
     bathrooms: 1,
     distanceFromUniversity: 0.8,
   },
-];
+]
+
 export default function ListingsScreen() {
-  const [filteredData, setFilteredData] = useState(propertyData);
-  const { width } = useWindowDimensions();
-  const isWeb = Platform.OS === "web";
+  const [filteredData, setFilteredData] = useState(propertyData)
+  const { width } = useWindowDimensions()
+  const isWeb = Platform.OS === "web"
+
+  const getNumColumns = () => {
+    if (!isWeb) return 1
+    if (width >= 1200) return 4
+    if (width >= 768) return 2
+    return 1
+  }
+
+  const numColumns = getNumColumns()
+  const gap = 16 // Gap between cards
+  const cardWidth = isWeb
+    ? `calc(${100 / numColumns}% - ${(gap * (numColumns - 1)) / numColumns}px)`
+    : "100%"
 
   return (
     <Theme name="light">
@@ -119,23 +134,30 @@ export default function ListingsScreen() {
         {/* Property List */}
         <FlatList
           data={filteredData}
-          renderItem={({ item }) => (
-            <YStack marginBottom="$4">
+          renderItem={({ item, index }) => (
+            <YStack
+              width={cardWidth}
+              marginBottom={gap}
+              marginRight={isWeb && (index + 1) % numColumns !== 0 ? gap : 0}
+            >
               <PropertyCard
                 item={item}
                 isWeb={isWeb}
                 onPress={() =>
-                  router.push({ pathname: "/screens/PropertyDetailScreen", params: item })
+                  router.push({
+                    pathname: "/screens/PropertyDetailScreen",
+                    params: item,
+                  })
                 }
               />
             </YStack>
           )}
           keyExtractor={(item) => item.id}
-          numColumns={isWeb ? 3 : 1}
-          key={isWeb ? "web" : "mobile"}
+          numColumns={numColumns}
+          key={`${isWeb ? "web" : "mobile"}-${numColumns}`}
           columnWrapperStyle={
-            isWeb
-              ? { justifyContent: "space-between", marginBottom: 16 }
+            isWeb && numColumns > 1
+              ? { justifyContent: "flex-start" }
               : undefined
           }
           showsVerticalScrollIndicator={false}
@@ -143,5 +165,5 @@ export default function ListingsScreen() {
         />
       </YStack>
     </Theme>
-  );
+  )
 }
