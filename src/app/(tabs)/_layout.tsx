@@ -4,7 +4,7 @@ import { Text, View, useColorScheme } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 
 export default function TabLayout() {
-  const tintColor = "#000";
+  const tintColor = "#016180";
 
   const CustomTabIcon = ({ name, title, focused }) => (
     <View style={{ alignItems: "center", justifyContent: "center" }}>
